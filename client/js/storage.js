@@ -1,22 +1,32 @@
 const storage = (function() {
   const REQUEST_ORIGIN = Object.freeze({
     SYSTEM: 'SYSTEM',
-    USER: 'USER'
+    USER: 'USER',
+    DRILLER: 'DRILLER'
   });
 
-  const requestsMap = {};
+  const requestsMap = Object.create(null);
 
-  const logRequest = function(phrase) {
-    if (requestsMap.phrase) {
-      requestsMap[phrase] += 1;
+  const logRequest = function(phrase, requestOrigin) {
+    if (requestsMap[phrase]) {
+      if (requestsMap[phrase][requestOrigin]) {
+        requestsMap[phrase][requestOrigin] += 1; 
+      } else {
+        requestsMap[phrase][requestOrigin] = 1;
+      }
     } else {
-      requestsMap[phrase] = 1;
+      requestsMap[phrase] = {};
+      requestsMap[phrase][requestOrigin] = 1;
     }
   }
 
+  const getStats = function() {
+    return requestsMap;
+  };
+
   const getLangEntity = function(phrase, requestOrigin) {
-    if (requestOrigin === REQUEST_ORIGIN.USER) {
-      logRequest(phrase);
+    if (~[REQUEST_ORIGIN.USER, REQUEST_ORIGIN.DRILLER].indexOf(requestOrigin)) {
+      logRequest(phrase, requestOrigin);
     }
 
     return new Promise(function(resolve, reject) {
@@ -29,9 +39,13 @@ const storage = (function() {
   };
 
   return {
-    getLangEntity
+    getLangEntity,
+    getStats
   };
 })();
+
+// TODO: remove this
+window.storage = storage;
 
 var DICTIONARY = {
   tree: {
@@ -63,5 +77,10 @@ var DICTIONARY = {
     phrase: 'nonlinear',
     translation: 'нелинейный',
     examples: ['The list data structure is nonlinear one.']
+  },
+  binary: {
+    phrase: 'binary',
+    translation: 'двоичный',
+    examples: ['Binary tree is data structure often used in computer science.']
   }
 };

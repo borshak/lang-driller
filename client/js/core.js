@@ -6,13 +6,15 @@ console.log('-- Reader App --'); // TODO: remove this
 const mainStorage = storage;
 const pdfReader = pdf(appContainer);
 const wordCard = card(appContainer);
+const drill = driller(appContainer);
 
 pdfReader.create();
 wordCard.create();
-
+drill.create();
 
 // EVENT LISTENERS
 pdfReader.addSelectionEventListener(function(selectedText) {
+  drill.hide(); // TODO (?)
   if (selectedText) {
     mainStorage.getLangEntity(selectedText.toLowerCase(), 'USER')
       .then(function(langEntity) {
@@ -28,8 +30,18 @@ pdfReader.addSelectionEventListener(function(selectedText) {
   }
 });
 
-wordCard.addDrillButtonEventListener(function(languageConstruction) {
-  console.log('DRILL needed for:', languageConstruction);
+wordCard.addDrillButtonEventListener(function(langEntity) {
+  wordCard.hide();
+  // debugger;
+  console.log('DRILL needed for:', langEntity);
+  mainStorage.getLangEntity(langEntity.phrase, 'DRILLER')
+    .then(function(extendedLangEntity) {
+      if (langEntity) {
+        drill.show(extendedLangEntity);
+      } else {
+        drill.show(langEntity);
+      }
+    });
 });
 
 

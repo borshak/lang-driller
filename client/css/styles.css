@@ -35,3 +35,20 @@
 .word-card h3 {
   margin: 0;
 }
+
+.driller {
+  position: absolute;
+  display: block;
+  top: 100px;
+  left: 100px;
+  width: 500px;
+  min-height: 30px;
+  padding: 10px;
+  background-color: rgb(124, 216, 124);
+  border: 2px solid rgb(15, 131, 0);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+}
+
+.driller.hidden {
+  display: none;
+}
