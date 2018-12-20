@@ -1,4 +1,4 @@
-const driller = function(containerToAdd) {
+const driller = (function() {
 
   const HIDDEN_CLASS = 'hidden';
   const EXERSISE_CONTAINER_CLASS = 'exersise-container';
@@ -14,7 +14,7 @@ const driller = function(containerToAdd) {
     `; 
   };
 
-  const create = function() {
+  const init = function(containerToAdd) {
     rootDomElement = document.createElement('div');
     rootDomElement.className = `driller ${HIDDEN_CLASS}`;
     rootDomElement.innerHTML = layout();
@@ -91,9 +91,9 @@ const driller = function(containerToAdd) {
   };
 
   return {
-    create,
+    init,
     show,
     hide,
     destroy
   };
-};
+})();

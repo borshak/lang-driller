@@ -3,47 +3,42 @@ const appContainer = document.getElementById('app');
 console.log('-- Reader App --'); // TODO: remove this
 
 // INIT
-const mainStorage = storage;
-const pdfReader = pdf(appContainer);
-const wordCard = card(appContainer);
-const drill = driller(appContainer);
-
-pdfReader.create();
-wordCard.create();
-drill.create();
+pdf.init(appContainer);
+card.init(appContainer);
+driller.init(appContainer);
 
 // EVENT LISTENERS
-pdfReader.addSelectionEventListener(function(selectedText) {
-  drill.hide(); // TODO (?)
+pdf.addSelectionEventListener(function(selectedText) {
+  driller.hide(); // TODO (?)
   if (selectedText) {
-    mainStorage.getLangEntity(selectedText.toLowerCase(), 'USER')
+    storage.getLangEntity(selectedText.toLowerCase(), 'USER')
       .then(function(langEntity) {
         if (langEntity) {
-          wordCard.show(langEntity);
+          card.show(langEntity);
         } else {
           console.log('MISSED: ', selectedText); // TODO: remove this
-          wordCard.hide();
+          card.hide();
         }
       });
   } else {
-    wordCard.hide();
+    card.hide();
   }
 });
 
-wordCard.addDrillButtonEventListener(function(langEntity) {
-  wordCard.hide();
+card.addDrillButtonEventListener(function(langEntity) {
+  card.hide();
   // debugger;
   console.log('DRILL needed for:', langEntity);
-  mainStorage.getLangEntity(langEntity.phrase, 'DRILLER')
+  storage.getLangEntity(langEntity.phrase, 'DRILLER')
     .then(function(extendedLangEntity) {
       if (langEntity) {
-        drill.show(extendedLangEntity);
+        driller.show(extendedLangEntity);
       } else {
-        drill.show(langEntity);
+        driller.show(langEntity);
       }
     });
 });
 
 
 // START POINT
-pdfReader.show();
+pdf.show();

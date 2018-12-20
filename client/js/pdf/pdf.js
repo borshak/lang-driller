@@ -1,4 +1,4 @@
-const pdf = function(containerToAdd) {
+const pdf = (function() {
   const layout = `
 <h2>Binary Trees and Binary Search Trees</h2>
 <p>Trees are a commonly used data structure in computer science. A tree is a nonlinear
@@ -25,7 +25,7 @@ is not a direct relationship between those two positions.</p>
 
   let rootDomElement;
 
-  const create = function() {
+  const init = function(containerToAdd) {
     rootDomElement = document.createElement('div');
     rootDomElement.innerHTML = layout;
     rootDomElement.className = `pdf-reader ${HIDDEN_CLASS}`;
@@ -69,11 +69,11 @@ is not a direct relationship between those two positions.</p>
   };
 
   return {
-    create,
+    init,
     show,
     hide,
     addSelectionEventListener,
     removeSelectionEventListener,
     destroy
   };
-};
+})();

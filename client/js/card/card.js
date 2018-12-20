@@ -1,4 +1,4 @@
-const card = function(containerToAdd) {
+const card = (function() {
 
   const layout = function(langEntity) {
     return `
@@ -14,7 +14,7 @@ const card = function(containerToAdd) {
   let rootDomElement;
   let languageEntity;
 
-  const create = function() {
+  const init = function(containerToAdd) {
     rootDomElement = document.createElement('div');
     rootDomElement.className = `word-card ${HIDDEN_CLASS}`;
     containerToAdd.appendChild(rootDomElement);
@@ -56,11 +56,11 @@ const card = function(containerToAdd) {
   };
 
   return {
-    create,
+    init,
     show,
     hide,
     addDrillButtonEventListener,
     removeDrillButtonEventListener,
     destroy
   };
-};
+})();
