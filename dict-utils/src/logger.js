@@ -38,6 +38,15 @@ const log = (msg='', options=null) => {
   } else {
     console.log(message);
   }
-}
+};
 
-module.exports = log;
+const logProgress = msg => {
+  process.stdout.clearLine();
+  process.stdout.cursorTo(0);
+  process.stdout.write(msg);
+};
+
+module.exports = {
+  log,
+  logProgress
+};
