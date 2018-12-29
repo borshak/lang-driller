@@ -10,6 +10,8 @@ const arguments = require('./arguments');
 const log = logger.log;
 const UTF8 = 'utf-8';
 
+
+// Load and parse CSV with frequency list
 const prepareCSV = csvFileName => {
   const promise = new Promise((resolve, reject) => {
     fs.readFile(csvFileName, UTF8, (error, data) => {
@@ -49,6 +51,8 @@ const prepareCSV = csvFileName => {
   return promise;
 };
 
+
+// Load DSL dictionary
 const loadDSLDict = dslFileName => {
   const promise = new Promise((resolve, reject) => {
     fs.readFile(dslFileName, UTF8, (error, data) => {
@@ -59,18 +63,29 @@ const loadDSLDict = dslFileName => {
         process.exit(1);
       }
 
-      const dictionary = dslDicts.parse(data);
-    
-      log('DSL ready', {color: 'green'});
-      resolve(dictionary);
+      log('DSL loaded', {color: 'green'});
+      resolve(data);
     });
   });
 
   return promise;
 };
 
-const _prepareTempDict = (frequencyList, dslDictionary) => {
 
+// Prepare DSL iterator
+const prepareDSLDict = dslDictContent => {
+  const promise = new Promise((resolve, reject) => {
+    const dictionary = dslDicts.parse(dslDictContent);
+    log('DSL iterator ready', {color: 'green'});
+    resolve(dictionary);
+  });
+
+  return promise;
+};
+
+
+// Create temporary dictionary with entities that exist in both frequency list and DSL dict
+const _prepareTempDict = (frequencyList, dslDictionary) => {
   const sourceLanguage = dslDictionary.meta.language.source;
   const targetLanguage = dslDictionary.meta.language.target;
 
@@ -119,6 +134,22 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
     return result;
   };
 
+  const handleLangEntity = async (frequencyList, langEntity, temporaryDict) => {
+    const promise = new Promise((resolve, reject) => {
+      if (isValidEntity(frequencyList, langEntity, temporaryDict)) {
+        const importance = extractImportance(frequencyList, langEntity);
+        const body = prepareEntityBody(langEntity, importance);
+        resolve({
+          importance,
+          body
+        });
+      } else {
+        resolve(null);
+      }  
+    });
+    return promise;
+  };
+
   // Entry point
   const promise = new Promise(async (resolve, reject) => {
     const temporaryDict = {};
@@ -132,15 +163,14 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
     log('Processing:');
 
     for (const langEntity of dslDictionary.phrase) {
-      if (isValidEntity(frequencyList, langEntity, temporaryDict)) {
-        const importance = extractImportance(frequencyList, langEntity);
-        const phraseBody = prepareEntityBody(langEntity, importance);
-        temporaryDict[importance] = phraseBody;
-
+      const phrase = await handleLangEntity(frequencyList, langEntity, temporaryDict);
+      if (phrase) {
+        temporaryDict[phrase.importance] = phrase.body;
         counter.hit += 1;
       } else {
         counter.miss += 1;
       }
+
       counter.total += 1;
       logger.logProgress(`TOTAL: ${counter.total},  HIT: ${counter.hit},  MISS: ${counter.miss}`);
     }
@@ -153,6 +183,8 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
   return promise;
 };
 
+
+// Move prepeared entities from temporary dict to result due to frequency and threshold
 const _prepareResultDict = (frequencyList, temporaryDict, threshold) => {
   const promise =  new Promise((resolve, reject) => {
     const result = {};
@@ -170,6 +202,8 @@ const _prepareResultDict = (frequencyList, temporaryDict, threshold) => {
   return promise;
 };
 
+
+// Do merge frequency list and DSL dictionary
 const mergeDicts = async (frequencyList, dslDictionary, threshold) => {
   const promise = new Promise(async (resolve, reject) => {
     const sourceLanguage = dslDictionary.meta.language.source;
@@ -195,9 +229,11 @@ const mergeDicts = async (frequencyList, dslDictionary, threshold) => {
   return promise;
 };
 
-const storeResult = (jsonFileName, json) => {
+
+// Store resulting data in file
+const storeResult = (fileName, data) => {
   const promise = new Promise((resolve, reject) => {
-    fs.writeFile(jsonFileName, json, (error, result) => {
+    fs.writeFile(fileName, data, (error, result) => {
       if (error) {
         log(' ERROR ', {bgColor: 'red'});
         log('Error in storeResult');
@@ -213,6 +249,8 @@ const storeResult = (jsonFileName, json) => {
   return promise;
 };
 
+
+// Main function
 const main = async arguments => {
   if (!arguments.valid) {
     log(arguments.errorMsg);
@@ -227,13 +265,15 @@ const main = async arguments => {
   log('--');
 
   const frequencyList = await prepareCSV(csvFileName); // CSV ready
-  const dslDictionary = await loadDSLDict(dslFileName); // DSL ready
+  const dslDictContent = await loadDSLDict(dslFileName); // DSL loaded
+  const dslDictionary = await prepareDSLDict(dslDictContent); // DSL iterator ready
   const resultObject = await mergeDicts(frequencyList, dslDictionary, threshold); // DICTS merged
+  
   const serializedJSON = JSON.stringify(resultObject);
   const jsonWritingResult = await storeResult(jsonFileName, serializedJSON);
 
   log(' DONE ', {bgColor: 'green'});
-  log('--');
+  log();
 };
 
 // Entry point
