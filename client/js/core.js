@@ -1,5 +1,13 @@
 const appContainer = document.getElementById('app');
 
+// TODO: refactor this
+const hideLoader = function() {
+  const loader = appContainer.getElementsByClassName('loader');
+  if (loader.length) {
+    appContainer.removeChild(loader[0]);
+  }
+};
+
 console.log('-- Reader App --'); // TODO: remove this
 
 // INIT
@@ -41,4 +49,12 @@ card.addDrillButtonEventListener(function(langEntity) {
 
 
 // START POINT
-pdf.show();
+// TODO: refactor this
+storage.isReadyPromise
+  .then(function(result) {
+    hideLoader();
+    pdf.show();
+  })
+  .catch(function(error) {
+    console.error('ERROR in Storage', error);
+  });

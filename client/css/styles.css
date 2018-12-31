@@ -1,3 +1,11 @@
+.loader {
+  display: block;
+  height: 400px;
+  line-height: 400px;
+  text-align: center;
+  color: green;
+}
+
 .container {
   /* min-height: 50px; */
   display: block;

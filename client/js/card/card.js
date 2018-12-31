@@ -1,11 +1,17 @@
 const card = (function() {
 
   const layout = function(langEntity) {
+
+    const phrase = `<h3>${langEntity.phrase}</h3>`;
+    const translation = `<p><i>${langEntity.translations[0]}</i></p>`;
+    const examples = langEntity.examples ? `<p>${langEntity.examples[0].source} - ${langEntity.examples[0].target}</p>` : '';
+    const buttons =  '<p><button class="drill">Drill</button> - <button class="close">X</button></p>';
+
     return `
-    <h3>${langEntity.phrase}</h3>
-    <p><i>${langEntity.translation}</i></p>
-    <p>${langEntity.examples}</p>
-    <p><button class="drill">Drill</button> - <button class="close">X</button></p>
+    ${phrase}
+    ${translation}
+    ${examples}
+    ${buttons}
     `; 
   };
 

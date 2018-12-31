@@ -1,9 +1,39 @@
 const storage = (function() {
+  
+  let DICTIONARY = {};
+  
   const REQUEST_ORIGIN = Object.freeze({
     SYSTEM: 'SYSTEM',
     USER: 'USER',
     DRILLER: 'DRILLER'
   });
+
+  // TODO: refactor this
+  const loadDictionary = () => {
+    const promise = new Promise(function(resolve, reject) {
+      fetch('./js/storage/dict.json')
+      .then(response => {
+          if (!response.ok) {
+            reject(new Error("HTTP error " + response.status));
+              // throw new Error("HTTP error " + response.status);
+          }
+          return response.json();
+      })
+      .then(dictJson => {
+        if (dictJson && dictJson.body) {
+          DICTIONARY = dictJson.body;
+          resolve(true);
+        } else {
+          reject(new Error("Wrond dictionary format - can't find 'body'"));
+        }
+      })
+      .catch(function (error) {
+          reject(error);
+          // this.dataError = true;
+      });
+    });
+    return promise;
+ };
 
   const requestsMap = Object.create(null);
 
@@ -38,9 +68,14 @@ const storage = (function() {
     });
   };
 
+
+  // Entry point
+const isReadyPromise = loadDictionary();
+
   return {
     getLangEntity,
-    getStats
+    getStats,
+    isReadyPromise
   };
 })();
 
