@@ -55,7 +55,7 @@ const prepareCSV = csvFileName => {
 // Load DSL dictionary
 const loadDSLDict = dslFileName => {
   const promise = new Promise((resolve, reject) => {
-    fs.readFile(dslFileName, UTF8, (error, data) => {
+    fs.readFile(dslFileName, 'utf16le', (error, data) => {
       if (error) {
         log(' ERROR ', {bgColor: 'red'});
         log('Error in loadDSLDict');
