@@ -194,7 +194,7 @@ const _prepareResultDict = (frequencyList, temporaryDict, threshold) => {
       if (entity.id in temporaryDict) {
         result[entity.phrase] = temporaryDict[entity.id];
         counter += 1;
-        if (counter >= threshold) break;
+        if (threshold && counter >= threshold) break;
       }
     }
     resolve(result);
