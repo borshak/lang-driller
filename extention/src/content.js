@@ -134,7 +134,7 @@ const viewModule = (function() {
 
   // Add bubble to DOM on init
   const bubbleDOM = document.createElement('div');
-  bubbleDOM.setAttribute('class', 'selection_bubble');
+  bubbleDOM.setAttribute('class', 'lang-driller-selection-bubble');
   document.body.appendChild(bubbleDOM);
 
 
@@ -153,12 +153,10 @@ const viewModule = (function() {
     tooltipContainer.classList.remove(hiddenCssClass);
   };
   
-  const showBubble = function(selectionPosition, selectedText, langEntity) {
-    const {x: mouseX, y: mouseY} = selectionPosition;
-    
+  const showBubble = function(x, y, selectedText, langEntity) {
     bubbleDOM.innerHTML = selectedText;
-    bubbleDOM.style.top = mouseY + 'px';
-    bubbleDOM.style.left = mouseX + 'px';
+    bubbleDOM.style.top = x + 'px';
+    bubbleDOM.style.left = y + 'px';
     bubbleDOM.style.visibility = 'visible';
 
     if (langEntity) {
@@ -169,8 +167,10 @@ const viewModule = (function() {
   };
 
   const showTranslation = function(selectionPosition, selectedText, langEntity) {
-    const {x: mouseX, y: mouseY} = selectionPosition;
-    showBubble(selectionPosition, selectedText, langEntity);
+    const OFFSET = 15;
+    const {x, y} = selectionPosition;
+
+    showBubble(x + OFFSET, y + OFFSET, selectedText, langEntity);
     if (langEntity) showTooltip(langEntity);
   };
 
@@ -197,40 +197,52 @@ const viewModule = (function() {
 // Controller
 const controller = (function() {
   // Predicate, returns true if some text selected
-  const isSomethingSelected = function(selection) {
-    return (selection 
-      && selection.toString
-      && typeof selection.toString === 'function'
-      && selection.toString().trim());
+  // const isSomethingSelected = function(selection) {
+  //   return (selection 
+  //     && selection.toString
+  //     && typeof selection.toString === 'function'
+  //     && selection.toString().trim());
+  // };
+
+  const getTextOfSelection = function(selection) {
+    return selection.toString().trim().toLowerCase();
+  };
+
+  const getPositionOfSelection = function(selection) {
+    const oRange = selection.getRangeAt(0);
+    const oRect = oRange.getBoundingClientRect();
+    return {
+      x: oRect.y,
+      y: oRect.x
+    };
+  };
+
+
+  const enableTranslation = function(event) {
+    const selection = window.getSelection();
+    const selectedText = getTextOfSelection(selection);
+
+    if (selectedText) {
+      const position = getPositionOfSelection(selection);
+      // const oRange = selection.getRangeAt(0); //get the text range
+      // const oRect = oRange.getBoundingClientRect();
+      console.log('position ->', position);
+
+      languageModule.getLangEntity(selectedText)
+        .then(function(langEntity) {
+        console.log('LE =>', langEntity);      
+        viewModule.showTranslation(position, selectedText, langEntity);
+      });
+    }
+  };
+
+  const disableTranslation = function(event) {
+    viewModule.hideTranslation();
   };
 
   const init = function() {
-    // Lets listen to mouseup DOM events.
-    document.addEventListener('mouseup', function (event) {
-      const selection = window.getSelection();
-      if (isSomethingSelected(selection)) {
-        const oRange = selection.getRangeAt(0); //get the text range
-        const oRect = oRange.getBoundingClientRect();
-        console.log('->', oRect);
-
-        const selectedText = selection.toString().trim().toLowerCase();
-        languageModule.getLangEntity(selectedText)
-          .then(function(langEntity) {
-          console.log('LE =>', langEntity);      
-          
-          const selectionPosition = {
-            x: event.clientX,
-            y: event.clientY
-          };
-          viewModule.showTranslation(selectionPosition, selectedText, langEntity);
-        });
-      }
-    }, false);
-
-    // Close the bubble when we click on the screen.
-    document.addEventListener('mousedown', function (event) {
-      viewModule.hideTranslation();
-    }, false);
+    document.addEventListener('mouseup', enableTranslation, false);
+    document.addEventListener('mousedown', disableTranslation, false);
   };
 
   return {

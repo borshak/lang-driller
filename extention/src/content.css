@@ -1,4 +1,4 @@
-.selection_bubble {
+.lang-driller-selection-bubble {
   visibility: hidden;
   position: absolute;
   top: 0;
@@ -16,7 +16,7 @@
   background-image: linear-gradient(to bottom, #fff85a, #fff74c, #fff63d, #fff529, #fff400);
 }
 
-.selection_bubble.missing {
+.lang-driller-selection-bubble.missing {
   background-color: #ccc;
   background-image: linear-gradient(to bottom, #ccc, #aaa);
 }
