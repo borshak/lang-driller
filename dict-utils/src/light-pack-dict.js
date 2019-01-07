@@ -126,7 +126,7 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
     const example = examples && examples.length ? examples[0] : null;
 
     const result = {
-        // phr: phrase,
+        phr: phrase,
         imp: importance,
         trn: trnanslation
     };
