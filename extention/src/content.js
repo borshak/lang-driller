@@ -1,4 +1,5 @@
-const storage = (function() {
+// Language module
+const languageModule = (function() {
 
   const DICTIONARY = {
     "be": {
@@ -122,84 +123,122 @@ const storage = (function() {
 })();
 
 
-// Add tooltip
-const tooltipCssClass = 'lang-driller-tooltip';
-const hiddenCssClass = 'hidden';
-const tooltipContainer = document.createElement("div");
-tooltipContainer.classList.add(tooltipCssClass, hiddenCssClass);
-document.body.appendChild(tooltipContainer);
+// View module
+const viewModule = (function() {
+  // Add tooltip to DOM on init
+  const tooltipCssClass = 'lang-driller-tooltip';
+  const hiddenCssClass = 'hidden';
+  const tooltipContainer = document.createElement("div");
+  tooltipContainer.classList.add(tooltipCssClass, hiddenCssClass);
+  document.body.appendChild(tooltipContainer);
 
-function showTooltip(langEntity) {
-  const phrase = `<p class="phrase">${langEntity.phr}</p>`;
-  const translation = `<p class="translation">${langEntity.trn}</p>`;
-  const example = langEntity.exm ? `<p class="example">${langEntity.exm.src} — ${langEntity.exm.tgt}</p>` : '';
+  // Add bubble to DOM on init
+  const bubbleDOM = document.createElement('div');
+  bubbleDOM.setAttribute('class', 'selection_bubble');
+  document.body.appendChild(bubbleDOM);
+
+
+  const showTooltip = function(langEntity) {
+    const phrase = `<p class="phrase">${langEntity.phr}</p>`;
+    const translation = `<p class="translation">${langEntity.trn}</p>`;
+    const example = langEntity.exm ? `<p class="example">${langEntity.exm.src} — ${langEntity.exm.tgt}</p>` : '';
+    
+    const layout = `
+    ${phrase}
+    ${translation}
+    ${example}
+    <i></i>
+  `;
+    tooltipContainer.innerHTML = layout;
+    tooltipContainer.classList.remove(hiddenCssClass);
+  };
   
-  const layout = `
-  ${phrase}
-  ${translation}
-  ${example}
-  <i></i>
-`;
-  tooltipContainer.innerHTML = layout;
-  tooltipContainer.classList.remove(hiddenCssClass);
-}
+  const showBubble = function(selectionPosition, selectedText, langEntity) {
+    const {x: mouseX, y: mouseY} = selectionPosition;
+    
+    bubbleDOM.innerHTML = selectedText;
+    bubbleDOM.style.top = mouseY + 'px';
+    bubbleDOM.style.left = mouseX + 'px';
+    bubbleDOM.style.visibility = 'visible';
 
-function hideTooltip() {
-  tooltipContainer.classList.add(hiddenCssClass);
-}
-
-
-const isSomethingSelected = function(selection) {
-  if (typeof selection === 'string'
-    && selection.trim()) {
-      return true;
+    if (langEntity) {
+      bubbleDOM.classList.remove('missing');
+    } else {
+      bubbleDOM.classList.add('missing');
     }
+  };
 
-    return false;
-}
+  const showTranslation = function(selectionPosition, selectedText, langEntity) {
+    const {x: mouseX, y: mouseY} = selectionPosition;
+    showBubble(selectionPosition, selectedText, langEntity);
+    if (langEntity) showTooltip(langEntity);
+  };
+
+  const hideTooltip = function() {
+    tooltipContainer.classList.add(hiddenCssClass);
+  };
+
+  const hideBubble = function() {
+    bubbleDOM.style.visibility = 'hidden';
+  };
+
+  const hideTranslation = function() {
+    hideTooltip();
+    hideBubble();
+  };
+
+  return {
+    showTranslation,
+    hideTranslation,
+  };
+})();
 
 
-// Add bubble to the top of the page.
-var bubbleDOM = document.createElement('div');
-bubbleDOM.setAttribute('class', 'selection_bubble');
-document.body.appendChild(bubbleDOM);
+// Controller
+const controller = (function() {
+  // Predicate, returns true if some text selected
+  const isSomethingSelected = function(selection) {
+    return (selection 
+      && selection.toString
+      && typeof selection.toString === 'function'
+      && selection.toString().trim());
+  };
 
-// Lets listen to mouseup DOM events.
-document.addEventListener('mouseup', function (e) {
-  var selection = window.getSelection().toString();
-  if (isSomethingSelected(selection)) {
+  const init = function() {
+    // Lets listen to mouseup DOM events.
+    document.addEventListener('mouseup', function (event) {
+      const selection = window.getSelection();
+      if (isSomethingSelected(selection)) {
+        const oRange = selection.getRangeAt(0); //get the text range
+        const oRect = oRange.getBoundingClientRect();
+        console.log('->', oRect);
 
-    const oRange = window.getSelection().getRangeAt(0); //get the text range
-    const oRect = oRange.getBoundingClientRect();
-    console.log('->', oRect);
+        const selectedText = selection.toString().trim().toLowerCase();
+        languageModule.getLangEntity(selectedText)
+          .then(function(langEntity) {
+          console.log('LE =>', langEntity);      
+          
+          const selectionPosition = {
+            x: event.clientX,
+            y: event.clientY
+          };
+          viewModule.showTranslation(selectionPosition, selectedText, langEntity);
+        });
+      }
+    }, false);
 
-    const selected = selection.trim().toLowerCase();
-    storage.getLangEntity(selected)
-      .then(function(langEntity) {
-      console.log('LE =>', langEntity);
-      renderBubble(e.clientX, e.clientY, selected, langEntity);
-    });
-  }
-}, false);
+    // Close the bubble when we click on the screen.
+    document.addEventListener('mousedown', function (event) {
+      viewModule.hideTranslation();
+    }, false);
+  };
+
+  return {
+    init
+  };
+
+})();
 
 
-// Close the bubble when we click on the screen.
-document.addEventListener('mousedown', function (e) {
-  bubbleDOM.style.visibility = 'hidden';
-  hideTooltip();
-}, false);
-
-// Move that bubble to the appropriate location.
-function renderBubble(mouseX, mouseY, selection, langEntity) {
-  bubbleDOM.innerHTML = selection;
-  bubbleDOM.style.top = mouseY + 'px';
-  bubbleDOM.style.left = mouseX + 'px';
-  bubbleDOM.style.visibility = 'visible';
-
-  if (langEntity) {
-    bubbleDOM.classList.remove('missing');
-    showTooltip(langEntity);
-  } else {
-    bubbleDOM.classList.add('missing');
-  }
-}
+// Entry point
+controller.init();
