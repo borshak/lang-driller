@@ -1,0 +1,112 @@
+.selection_bubble {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 6px;
+  border-radius: 6px;
+
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+
+  background-color: yellow;
+  background-image: linear-gradient(to bottom, #fff85a, #fff74c, #fff63d, #fff529, #fff400);
+}
+
+.selection_bubble.missing {
+  background-color: #ccc;
+  background-image: linear-gradient(to bottom, #ccc, #aaa);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    /* transform: translate3d(0, -6px, 0); */
+  }
+  to {
+    opacity: 1;
+    /* transform: translate3d(0, 0, 0); */
+  }
+}
+
+.lang-driller-tooltip.hidden {
+  animation-name: none;
+  visibility: hidden; 
+  opacity: 0;
+}
+
+.lang-driller-tooltip {
+  animation-name: appear;
+  animation-duration: 0.25s;
+
+  position:absolute;
+  display: block;
+  z-index:99999999;
+
+  visibility:visible; opacity:1;
+
+  left: 290px;
+  top: 180px;
+  transform:translate(-50%, -100%);
+  
+  border-radius:8px;
+  box-sizing:border-box;
+  box-shadow: 1px 1px 6px rgba(0,0,0,0.45);
+
+  min-width:200px; 
+  max-width: 350px;
+  padding:10px 20px;
+  background-color:rgba(66, 73, 82, 0.98);
+  
+  font-weight:normal;
+  font-size:13px;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.lang-driller-tooltip i {
+  position:absolute;
+  top:100%;
+  left:50%;
+  margin-left:-12px;
+  width:24px;
+  height:12px;
+  overflow:hidden;
+}
+
+.lang-driller-tooltip i::after {
+  content:'';
+  position:absolute;
+  width:12px;
+  height:12px;
+  left:50%;
+  transform:translate(-50%,-50%) rotate(45deg);
+  background-color:rgba(66, 73, 82, 0.98);
+  box-shadow: 1px 1px 6px rgba(0,0,0,0.45);
+}
+
+.lang-driller-tooltip p {
+  margin: 4px 4px 8px 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.lang-driller-tooltip p:last-of-type {
+  /* margin: 4px; */
+}
+
+.lang-driller-tooltip .phrase {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.lang-driller-tooltip .translation {
+  font-size: 15px;
+  font-style: italic;
+}
+
+.lang-driller-tooltip .example {
+  opacity: 0.85;
+}
