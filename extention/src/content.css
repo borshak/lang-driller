@@ -1,3 +1,4 @@
+/* Bubble */
 .lang-driller-selection-bubble {
   visibility: hidden;
   position: absolute;
@@ -5,12 +6,14 @@
   left: 0;
   padding: 6px;
   border-radius: 6px;
+  z-index:99999998;
 
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 
   font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1;
+  color: black;
 
   background-color: yellow;
   background-image: linear-gradient(to bottom, #fff85a, #fff74c, #fff63d, #fff529, #fff400);
@@ -21,6 +24,8 @@
   background-image: linear-gradient(to bottom, #ccc, #aaa);
 }
 
+
+/* Tooltip */
 @keyframes appear {
   from {
     opacity: 0;
@@ -46,11 +51,12 @@
   display: block;
   z-index:99999999;
 
-  visibility:visible; opacity:1;
+  visibility: visible;
+  opacity: 1;
 
   left: 290px;
   top: 180px;
-  transform:translate(-50%, -100%);
+  /* transform:translate(-50%, -100%); */
   
   border-radius:8px;
   box-sizing:border-box;
@@ -68,7 +74,7 @@
 
 .lang-driller-tooltip i {
   position:absolute;
-  top:100%;
+  /* top:100%; */
   left:50%;
   margin-left:-12px;
   width:24px;
@@ -82,15 +88,23 @@
   width:12px;
   height:12px;
   left:50%;
-  transform:translate(-50%,-50%) rotate(45deg);
+  /* transform:translate(-50%,-50%) rotate(45deg); */
   background-color:rgba(66, 73, 82, 0.98);
   box-shadow: 1px 1px 6px rgba(0,0,0,0.45);
 }
+
+.lang-driller-tooltip.point-to-bottom i { top: 100%; }
+.lang-driller-tooltip.point-to-bottom i::after { transform: translate(-50%, -50%) rotate(45deg); }
+
+.lang-driller-tooltip.point-to-top i { bottom: 100%; }
+.lang-driller-tooltip.point-to-top i::after { transform: translate(-50%, 50%) rotate(45deg); }
+
 
 .lang-driller-tooltip p {
   margin: 4px 4px 8px 4px;
   color: white;
   font-size: 14px;
+  line-height: 1.3;
 }
 
 .lang-driller-tooltip p:last-of-type {

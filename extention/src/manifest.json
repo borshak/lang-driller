@@ -1,14 +1,16 @@
 {
   "manifest_version": 2,
   "name": "Lang Driller",
+  "description": "Fast translation from English to Russian",
   "version": "0.1.0",
+  "author": "Alexander Borshak",
   "icons" : {
     "128" : "icon.png"
   },
   "content_scripts" : [
     {
-      // "matches" : ["*://borshak.com/*"],
-      "js" : ["content.js"],
+      "matches" : ["http://*/*", "https://*/*"],
+      "js" : ["dict.js", "content.js"],
       "css": ["content.css"]
     }
   ],
