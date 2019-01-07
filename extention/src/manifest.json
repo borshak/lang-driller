@@ -1,18 +1,20 @@
 {
   "manifest_version": 2,
   "name": "Lang Driller",
-  "description": "Fast translation from English to Russian",
-  "version": "0.1.0",
+  "short_name": "Lang Driller",
+  "description": "Fast words translation from English to Russian",
+  "version": "0.2.0",
   "author": "Alexander Borshak",
   "icons" : {
     "128" : "icon.png"
   },
-  "content_scripts" : [
-    {
-      "matches" : ["http://*/*", "https://*/*"],
-      "js" : ["dict.js", "content.js"],
-      "css": ["content.css"]
-    }
-  ],
-  "permissions" : ["activeTab"]
+  "browser_action" : {
+    "default_icon" : "icon.png"
+  },
+  "background" : {
+    "scripts" : ["trigger.js"],
+    "persistent" : false
+    },
+  "permissions" : ["activeTab"],
+  "web_accessible_resources": ["icon-enabled.png", "content.css", "dict.js", "content.js"]
 }
