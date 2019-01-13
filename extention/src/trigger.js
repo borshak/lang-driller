@@ -11,5 +11,8 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     file: 'content.js'
   });
 
-  chrome.browserAction.setIcon({path:"icon-enabled.png"});
+  chrome.browserAction.setIcon({
+    path:"enabled-icon.png",
+    tabId: tab.id
+  });
 });

@@ -3,7 +3,7 @@
   "name": "Lang Driller",
   "short_name": "Lang Driller",
   "description": "Fast words translation from English to Russian",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Alexander Borshak",
   "icons" : {
     "128" : "icon.png"
@@ -16,5 +16,15 @@
     "persistent" : false
     },
   "permissions" : ["activeTab"],
-  "web_accessible_resources": ["icon-enabled.png", "content.css", "dict.js", "content.js"]
+  "web_accessible_resources": ["enabled-icon.png", "content.css", "dict.js", "content.js"],
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "windows": "Alt+Shift+D",
+        "mac": "Alt+Shift+D",
+        "chromeos": "Alt+Shift+D",
+        "linux": "Alt+Shift+D"
+      }
+    }
+  }
 }
