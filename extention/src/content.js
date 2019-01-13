@@ -231,26 +231,32 @@ const viewModule = (function() {
     bubbleContainer.style.visibility = 'hidden';
   };
 
-  const _isInsideTooltipClicked = function(event) {
-    return tooltipContainer === event.target || tooltipContainer.contains(event.target);
+  const hideTranslation = function(event) {
+    hideTooltip();
+    hideBubble();
   };
 
-  const hideTranslation = function(event) {
-    if (!_isInsideTooltipClicked(event)) {
-      hideTooltip();
-      hideBubble();
-    }
+  const getTooltipContainer = function() {
+    return tooltipContainer;
+  };
+
+  const getBubbleContainer = function() {
+    return bubbleContainer;
   };
 
   return {
     showTranslation,
     hideTranslation,
+    getTooltipContainer,
+    getBubbleContainer
   };
 })();
 
 
 // Controller
 const controller = (function() {
+  const viewContainers = {};
+
   const getTextOfSelection = function(selection) {
     return selection.toString().trim().toLowerCase();
   };
@@ -281,10 +287,22 @@ const controller = (function() {
   };
 
   const disableTranslation = function(event) {
-    viewModule.hideTranslation(event);
+    const _isInsideTooltipClicked = function(event) {
+      return viewContainers.tooltipContainer === event.target 
+        || viewContainers.tooltipContainer.contains(event.target);
+    };
+
+    if (!_isInsideTooltipClicked(event)) {
+      viewModule.hideTranslation(event);
+    }
   };
 
   const init = function() {
+    // Get references for main view (DOM) containers
+    viewContainers.tooltipContainer = viewModule.getTooltipContainer();
+    viewContainers.bubbleContainer = viewModule.getBubbleContainer();
+
+    // Add event listeners
     document.addEventListener('mouseup', enableTranslation, false);
     document.addEventListener('mousedown', disableTranslation, false);
   };
