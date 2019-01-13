@@ -56,35 +56,68 @@ class LangEntity {
 // Language module
 const languageModule = (function() {
 
-  const isPlural = function(phrase) {
-    return phrase.endsWith('s') || phrase.endsWith('\'s');
+  const _withEnding = function(ending, precision) {
+    const _removeFromEnd = function(str, subStr) {
+      return str.substring(0, str.lastIndexOf(subStr));
+    };
+    
+    return function(phrase) {
+      if (!phrase.endsWith(ending)) return null;
+  
+      const reducedPhrase = _removeFromEnd(phrase, ending);
+      const result = DICTIONARY[reducedPhrase];
+      if (result) {
+        return {
+          ...result,
+          precision
+        };
+      }
+      
+      return null;
+    };
   };
 
-  const removePlural = function(phrase) {
-    if (phrase.endsWith('\'s')) return phrase.substring(0, phrase.length - 2);
-    else if (phrase.endsWith('s')) return phrase.substring(0, phrase.length - 1);
-    else return phrase;
+
+  /**
+   * Returns objects with raw description of language entity or null
+   * @param {string} phrase
+   * @returns {object|null} 
+   */
+  const retrieveLengEntity = function(phrase) {
+    const gettersList = [
+      _withEnding('', 1), // exact match
+      _withEnding('\'s', 0.75),
+      _withEnding('s', 0.75),
+      _withEnding('ed', 0.75),
+      _withEnding('ing', 0.75)
+    ];
+
+    for (let i=0, max=gettersList.length; i < max; i++) {
+      const result = gettersList[i](phrase);
+      if (result) return result;
+    }
+
+    return null;
   };
 
+  /**
+   * Returns Promise with result of getting lang entity
+   * @param {*} rawPhrase
+   * @returns {Promise} on resolve will be {LangEntity instance | null} 
+   */
   const getLangEntity = function(rawPhrase) {
     const phrase = rawPhrase.length ? rawPhrase : '';
+    const rawLengEntity = retrieveLengEntity(phrase);
+    let langEntity;
+
+    try {
+      langEntity = new LangEntity(rawLengEntity);
+    } catch(error) {
+      langEntity = null;
+    }
 
     return new Promise(function(resolve, reject) {
-      if (DICTIONARY[phrase]) {
-        const langEntity = new LangEntity({
-          ...DICTIONARY[phrase],
-          precision: 1
-        });
-        resolve(langEntity);
-      } else if (isPlural(phrase) && DICTIONARY[removePlural(phrase)]) {
-        const langEntity = new LangEntity({
-          ...DICTIONARY[removePlural(phrase)],
-          precision: 0.75
-        });
-        resolve(langEntity);
-      } else {
-        resolve(null);
-      }
+      resolve(langEntity);
     });
   };
 
