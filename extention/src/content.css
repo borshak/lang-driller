@@ -121,6 +121,19 @@
   margin-right: 4px;
 }
 
+.lang-driller-tooltip .phrase .speaker-icon {
+  margin-left: 4px;
+  opacity: 0.35;
+  color: #90ee90;
+  cursor: pointer;
+  transition: opacity 0.25s;
+}
+
+.lang-driller-tooltip .phrase .speaker-icon:hover {
+  opacity: 0.75;
+}
+
+
 .lang-driller-tooltip .translation {
   font-size: 15px;
   font-style: italic;

@@ -18,7 +18,7 @@ class LangEntity {
   _unpackExample(example) {
     if (!example
       || !example.src
-      || !example.tgt) this.example = null;
+      || !example.tgt) return null;
 
     return {
       source: example.src,
@@ -75,14 +75,12 @@ const languageModule = (function() {
           ...DICTIONARY[phrase],
           precision: 1
         });
-        console.log('=>', langEntity);
         resolve(langEntity);
       } else if (isPlural(phrase) && DICTIONARY[removePlural(phrase)]) {
         const langEntity = new LangEntity({
           ...DICTIONARY[removePlural(phrase)],
           precision: 0.75
         });
-        console.log('=>', langEntity);
         resolve(langEntity);
       } else {
         resolve(null);
@@ -98,11 +96,37 @@ const languageModule = (function() {
 
 // View module
 const viewModule = (function() {
+  const speechCssClass = 'speaker-icon';
+  const actualPhraseCssClass = 'actual-phrase';
+
+  // Check Speech API presence
+  const isSpeechApiAvailable = window
+    &&  window.speechSynthesis
+    && window.speechSynthesis.speak
+    && typeof window.speechSynthesis.speak === 'function';
+
+  const addSpeakerClickHandler = function() {
+    tooltipContainer.addEventListener('click', function(event) {
+      if (isSpeechApiAvailable) {
+        const speakerNode = tooltipContainer.getElementsByClassName(speechCssClass)[0];
+        if (event.target === speakerNode) {
+          const phraseContainer = tooltipContainer.getElementsByClassName(actualPhraseCssClass);
+          if (phraseContainer) {
+            const phrase = phraseContainer[0].innerText;
+            const utterThis = new SpeechSynthesisUtterance(phrase);
+            window.speechSynthesis.speak(utterThis);
+          }
+        }
+      }
+    });
+  };
+
   // Add tooltip to DOM on init
   const tooltipCssClass = 'lang-driller-tooltip';
   const hiddenCssClass = 'hidden';
   const tooltipContainer = document.createElement("div");
   tooltipContainer.classList.add(tooltipCssClass, hiddenCssClass);
+  addSpeakerClickHandler();
   document.body.appendChild(tooltipContainer);
 
   // Add bubble to DOM on init
@@ -112,7 +136,9 @@ const viewModule = (function() {
 
   const showTooltip = function(langEntity) {
     const inaccuracyMarker = !langEntity.isExactMatchOriginRequest() ? '<span class="inaccuracy-marker">~</span>' : '';
-    const phrase = `<p class="phrase">${inaccuracyMarker}${langEntity.getPhrase()}</p>`;
+    const speakerIcon = isSpeechApiAvailable ? `<span class="${speechCssClass}">&#x1f509</span>` : '';
+    const actualPhrase = `<span class="${actualPhraseCssClass}">${langEntity.getPhrase()}</span>`;
+    const phrase = `<p class="phrase">${inaccuracyMarker}${actualPhrase}${speakerIcon}</p>`;
     const translation = `<p class="translation">${langEntity.getTranslation()}</p>`;
     const example = langEntity.isExampleExist() ? `<p class="example">${langEntity.getExampleSource()} — ${langEntity.getExampleTarget()}</p>` : '';
     
@@ -205,9 +231,15 @@ const viewModule = (function() {
     bubbleContainer.style.visibility = 'hidden';
   };
 
-  const hideTranslation = function() {
-    hideTooltip();
-    hideBubble();
+  const _isInsideTooltipClicked = function(event) {
+    return tooltipContainer === event.target || tooltipContainer.contains(event.target);
+  };
+
+  const hideTranslation = function(event) {
+    if (!_isInsideTooltipClicked(event)) {
+      hideTooltip();
+      hideBubble();
+    }
   };
 
   return {
@@ -249,7 +281,7 @@ const controller = (function() {
   };
 
   const disableTranslation = function(event) {
-    viewModule.hideTranslation();
+    viewModule.hideTranslation(event);
   };
 
   const init = function() {
@@ -266,5 +298,3 @@ const controller = (function() {
 
 // Entry point
 controller.init();
-
-console.log('PEEK');
