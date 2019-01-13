@@ -9,6 +9,7 @@ const arguments = require('./arguments');
 
 const log = logger.log;
 const UTF8 = 'utf-8';
+const UTF16 = 'utf16le';
 
 
 // Load and parse CSV with frequency list
@@ -55,7 +56,7 @@ const prepareCSV = csvFileName => {
 // Load DSL dictionary
 const loadDSLDict = dslFileName => {
   const promise = new Promise((resolve, reject) => {
-    fs.readFile(dslFileName, UTF8, (error, data) => {
+    fs.readFile(dslFileName, UTF16, (error, data) => {
       if (error) {
         log(' ERROR ', {bgColor: 'red'});
         log('Error in loadDSLDict');
@@ -99,9 +100,21 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
   };
 
   const isValidEntity = (frequencyList, langEntity, temporaryDict) => {
+    const isLooksSuspicious = translation => {
+      const result = ~translation.indexOf('[') || ~translation.indexOf(']');
+
+      if (result) console.log(translation);
+
+      return result;
+    };
+
     const {phrase} = langEntity;
     const importance = extractImportance(frequencyList, langEntity);
-    return importance !== null && !temporaryDict[importance] && langEntity.explanations.length;
+    return importance !== null 
+    && !temporaryDict[importance] 
+    && langEntity.explanations.length
+    && langEntity.explanations[0].translations
+    && !isLooksSuspicious(langEntity.explanations[0].translations[0]);
   };
 
   const extractExamples = examples => {
@@ -127,7 +140,6 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
 
     const result = {
         phr: phrase,
-        imp: importance,
         trn: trnanslation
     };
 
