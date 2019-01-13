@@ -116,6 +116,11 @@
   font-weight: bold;
 }
 
+.lang-driller-tooltip .phrase .inaccuracy-marker {
+  opacity: 0.5;
+  margin-right: 4px;
+}
+
 .lang-driller-tooltip .translation {
   font-size: 15px;
   font-style: italic;

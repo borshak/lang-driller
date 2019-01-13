@@ -1,3 +1,58 @@
+class LangEntity {
+  constructor(rawEntity) {
+    if (!rawEntity
+      || !rawEntity.phr
+      || !rawEntity.trn
+      || !rawEntity.precision) {
+      throw new Error('Wrong data for LangEntity constructor.');
+    }
+
+    this.phrase = rawEntity.phr;
+    this.translation = rawEntity.trn;
+    this.example = this._unpackExample(rawEntity.exm);
+
+    // Additional parameters
+    this.precision = rawEntity.precision || 0;
+  }
+
+  _unpackExample(example) {
+    if (!example
+      || !example.src
+      || !example.tgt) this.example = null;
+
+    return {
+      source: example.src,
+      target: example.tgt
+    };
+  }
+
+  isExampleExist() {
+    return !!this.example;
+  }
+
+  isExactMatchOriginRequest() {
+    return this.precision === 1;
+  }
+
+  getPhrase() {
+    return this.phrase;
+  }
+
+  getTranslation() {
+    return this.translation;
+  }
+
+  getExampleSource() {
+    return this.example.source;
+  }
+
+  getExampleTarget() {
+    return this.example.target;
+  }
+
+}
+
+
 // Language module
 const languageModule = (function() {
 
@@ -16,9 +71,19 @@ const languageModule = (function() {
 
     return new Promise(function(resolve, reject) {
       if (DICTIONARY[phrase]) {
-        resolve(DICTIONARY[phrase]);
+        const langEntity = new LangEntity({
+          ...DICTIONARY[phrase],
+          precision: 1
+        });
+        console.log('=>', langEntity);
+        resolve(langEntity);
       } else if (isPlural(phrase) && DICTIONARY[removePlural(phrase)]) {
-        resolve(DICTIONARY[removePlural(phrase)]);
+        const langEntity = new LangEntity({
+          ...DICTIONARY[removePlural(phrase)],
+          precision: 0.75
+        });
+        console.log('=>', langEntity);
+        resolve(langEntity);
       } else {
         resolve(null);
       }
@@ -46,9 +111,10 @@ const viewModule = (function() {
   document.body.appendChild(bubbleContainer);
 
   const showTooltip = function(langEntity) {
-    const phrase = `<p class="phrase">${langEntity.phr}</p>`;
-    const translation = `<p class="translation">${langEntity.trn}</p>`;
-    const example = langEntity.exm ? `<p class="example">${langEntity.exm.src} — ${langEntity.exm.tgt}</p>` : '';
+    const inaccuracyMarker = !langEntity.isExactMatchOriginRequest() ? '<span class="inaccuracy-marker">~</span>' : '';
+    const phrase = `<p class="phrase">${inaccuracyMarker}${langEntity.getPhrase()}</p>`;
+    const translation = `<p class="translation">${langEntity.getTranslation()}</p>`;
+    const example = langEntity.isExampleExist() ? `<p class="example">${langEntity.getExampleSource()} — ${langEntity.getExampleTarget()}</p>` : '';
     
     const layout = `
     ${phrase}
@@ -200,3 +266,5 @@ const controller = (function() {
 
 // Entry point
 controller.init();
+
+console.log('PEEK');
