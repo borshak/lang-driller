@@ -102,9 +102,6 @@ const _prepareTempDict = (frequencyList, dslDictionary) => {
   const isValidEntity = (frequencyList, langEntity, temporaryDict) => {
     const isLooksSuspicious = translation => {
       const result = ~translation.indexOf('[') || ~translation.indexOf(']');
-
-      if (result) console.log(translation);
-
       return result;
     };
 
@@ -229,15 +226,17 @@ const mergeDicts = async (frequencyList, dslDictionary, threshold) => {
     const temporaryDict = await _prepareTempDict(frequencyList, dslDictionary);
     const resultDict = await _prepareResultDict(frequencyList, temporaryDict, threshold);
 
-    const resultObject = {
-      meta: {
-        language: {
-          source: sourceLanguage,
-          target: targetLanguage
-        }
-      },
-      body: resultDict
-    };
+    // const resultObject = {
+    //   meta: {
+    //     language: {
+    //       source: sourceLanguage,
+    //       target: targetLanguage
+    //     }
+    //   },
+    //   body: resultDict
+    // };
+
+    const resultObject = resultDict;
 
     log('DICTS merged', {color: 'green'});
     resolve(resultObject);

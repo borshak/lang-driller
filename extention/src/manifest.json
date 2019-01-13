@@ -3,7 +3,7 @@
   "name": "Lang Driller",
   "short_name": "Lang Driller",
   "description": "Fast words translation from English to Russian",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "author": "Alexander Borshak",
   "icons" : {
     "128" : "icon.png"
